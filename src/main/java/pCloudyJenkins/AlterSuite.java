@@ -1,125 +1,70 @@
 package pCloudyJenkins;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import org.apache.commons.io.FileUtils;
-import org.openqa.selenium.By;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.service.local.AppiumDriverLocalService;
 
-public class Runner {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.testng.IAlterSuiteListener;
+import org.testng.xml.XmlSuite;
+import org.testng.xml.XmlTest;
 
-	AppiumDriverLocalService service;
-	AppiumDriver<WebElement> driver;
-	String folder_name;
-	DateFormat df;
+public class AlterSuite implements IAlterSuiteListener {
+
+	@Override
+	public void alter(List<XmlSuite> suites) {
+
+	    System.out.println("Strated......................"+System.getenv("pCloudy_Devices"));
+		AlterSuite alterSuite = new AlterSuite();
+		String jsonString = System.getenv("pCloudy_Devices");
+		//String jsonString ="{\"devices\":[\"Samsung_GalaxyNote10_Android_10.0.0_f34e3\",\"Samsung_GalaxyA50_Android_10.0.0_310bf\"]}";
+		//alterSuite.validatejSonString(jsonString);
+		System.out.println(jsonString);
+		List<Map<String, String>> deviceList = alterSuite.getDevices(jsonString);
+		System.out.println(deviceList.size());
+		XmlSuite suite = suites.get(0);
+		suite.setThreadCount(deviceList.size());
+		suite.setPreserveOrder(true);
+		List<XmlTest> dynamictests = suite.getTests().stream().filter(xmlTest -> xmlTest.getName().startsWith("Test")).collect(Collectors.toList());
+		dynamictests.get(0).getLocalParameters().put("device", deviceList.get(0).get("name"));
+		
+		List<XmlTest> clonedTests = new ArrayList<>();
+		for (XmlTest each : dynamictests) {
+			for (int i = 1; i < deviceList.size(); i++) {
+				XmlTest cloned = new XmlTest(suite);
+				cloned.setName(deviceList.get(i).get("name"));
+				cloned.getLocalParameters().put("device", deviceList.get(i).get("name"));
+				//cloned.getLocalParameters().put("version", deviceList.get(i).get("version"));
+				cloned.getXmlClasses().addAll(each.getClasses());
+				clonedTests.add(cloned);
+			}
+		}
+		dynamictests.addAll(clonedTests);
+	}
 	
-	@BeforeTest
-	public void setUpSuite() throws Exception {
-		
-	}
-		
-	@Parameters({ "device"})
-	@BeforeMethod
-	public void prepareTest(String device) throws IOException, InterruptedException {
-		
-		DesiredCapabilities capabilities = new DesiredCapabilities();
-		System.out.println(device);
-		System.out.println(System.getenv("pCloudy_Username"));
-		System.out.println(System.getenv("pCloudy_ApiKey"));
-		System.out.println(System.getenv("pCloudy_ApplicationName"));
-		System.out.println(System.getenv("pCloudy_DurationInMinutes"));
-	    capabilities.setCapability("pCloudy_Username", System.getenv("pCloudy_Username"));
-		capabilities.setCapability("pCloudy_ApiKey",  System.getenv("pCloudy_ApiKey"));
-		capabilities.setCapability("pCloudy_ApplicationName", System.getenv("pCloudy_ApplicationName"));
-		capabilities.setCapability("pCloudy_DurationInMinutes",System.getenv("pCloudy_DurationInMinutes"));
-		/*capabilities.setCapability("pCloudy_Username", "sridatta.pani@sstsinc.com");
-		capabilities.setCapability("pCloudy_ApiKey", "m3pbymd6k69622p99dkjtj5k");
-		capabilities.setCapability("pCloudy_ApplicationName", "pCloudyAppiumDemo.apk");
-		capabilities.setCapability("pCloudy_DurationInMinutes", 10);*/
-		capabilities.setCapability("pCloudy_DeviceFullName", device);
-		capabilities.setCapability("automationName", "uiautomator2");
-		capabilities.setCapability("platformVersion", "8.0.0");
-		capabilities.setCapability("platformName", "Android");
-		capabilities.setCapability("newCommandTimeout", 600);
-		capabilities.setCapability("launchTimeout", 90000);
-		capabilities.setCapability("automationName", "uiautomator2");
-		capabilities.setCapability("appPackage", "com.pcloudy.appiumdemo");
-		capabilities.setCapability("appActivity", "com.ba.mobile.LaunchActivity");
-		driver = new AndroidDriver(new URL("https://device.pcloudy.com/appiumcloud/wd/hub"), capabilities);
-		
+	/*public void validatejSonString(String jsonString) {
+		if(jsonString.trim().isEmpty()) {
+			System.out.println("Empty JsonString");
+			throw new RuntimeException("Emty Device Json File");
+		}
+
+	}*/
+
+	public static List<Map<String, String>> getDevices(String jsonString){
+		List<Map<String, String>> deviceList = new ArrayList<Map<String, String>>();
+		JSONArray jsonArray = new JSONObject(jsonString).getJSONArray("devices");
+		for(int i =0; i<jsonArray.length(); i++) {
+			Map<String, String> device = new HashMap<String, String>() ;
+			String fullName = jsonArray.getString(i);
+			String[] deviceArray = fullName.split("_");
+			device.put("name", fullName);
+			deviceList.add(device);
+			System.out.println("insdide---------------");
+		}
+		return deviceList;
 	}
 
-	@Test
-	public void Test() throws IOException, InterruptedException {
-
-	    //Click on Accept button
-        driver.findElement(By.xpath("//android.widget.Button[@resource-id='com.pcloudy.appiumdemo:id/accept']")).click();
-        captureScreenShots();
-        
-        //Click on Flight button
-        driver.findElement(By.xpath("//android.widget.Button[@resource-id='com.pcloudy.appiumdemo:id/flightButton']")).click();
-        captureScreenShots();
-        
-        //Select from location
-        driver.findElement(By.xpath("//android.widget.Spinner[@resource-id='com.pcloudy.appiumdemo:id/spinnerfrom']")).click();
-        captureScreenShots();
-	    driver.findElement(By.xpath("//android.widget.CheckedTextView[@resource-id='android:id/text1' and @text='Bangalore, India (BLR)']")).click();
-	    captureScreenShots();
-		
-	    //Select to location
-	    driver.findElement(By.xpath("//android.widget.Spinner[@resource-id='com.pcloudy.appiumdemo:id/spinnerto']")).click();
-	    captureScreenShots();
-        driver.findElement(By.xpath("//android.widget.CheckedTextView[@resource-id='android:id/text1' and @text='Pune, India (PNQ)']")).click();
-        captureScreenShots();
-               
-        //Select one way trip
-        driver.findElement(By.xpath("//android.widget.RadioButton[@resource-id='com.pcloudy.appiumdemo:id/singleTrip']")).click();
-        
-        //Select departure time
-        driver.findElement(By.xpath("//android.widget.TextView[@resource-id='com.pcloudy.appiumdemo:id/txtdepart']")).click();
-        captureScreenShots();
-        driver.findElement(By.xpath("//android.widget.Button[@resource-id='android:id/button1' and @text='OK']")).click();
-        captureScreenShots();
-        
-        //Click on search flights button
-        driver.findElement(By.xpath("//android.widget.Button[@resource-id='com.pcloudy.appiumdemo:id/searchFlights']")).click();
-        captureScreenShots();
-	}
-
-
-	@AfterMethod
-	public void endTest() throws  IOException {
-
-		driver.quit();
-	}
-
-	//Capture screenshot
-	public void captureScreenShots() throws IOException {
-        folder_name="screenshot";
-        File f=((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
-        //Date format for screenshot file name
-        df=new  SimpleDateFormat("dd-MMM-yyyy__hh_mm_ssaa");
-        //create dir with given folder name
-        new File(folder_name).mkdir();
-        //Setting file name
-        String file_name=df.format(new Date())+".png";
-        //copy screenshot file into screenshot folder.
-        FileUtils.copyFile(f, new File(folder_name + "/" + file_name));
-    }
-	
 }
 

@@ -33,14 +33,23 @@ public class Runner {
 	}
 		
 	@Parameters({ "device"})
+	@BeforeMethod
 	public void prepareTest(String device) throws IOException, InterruptedException {
 		
 		DesiredCapabilities capabilities = new DesiredCapabilities();
-		
-		capabilities.setCapability("pCloudy_Username", System.getenv("pCloudy_Username"));
+		System.out.println(device);
+		System.out.println(System.getenv("pCloudy_Username"));
+		System.out.println(System.getenv("pCloudy_ApiKey"));
+		System.out.println(System.getenv("pCloudy_ApplicationName"));
+		System.out.println(System.getenv("pCloudy_DurationInMinutes"));
+	    capabilities.setCapability("pCloudy_Username", System.getenv("pCloudy_Username"));
 		capabilities.setCapability("pCloudy_ApiKey",  System.getenv("pCloudy_ApiKey"));
 		capabilities.setCapability("pCloudy_ApplicationName", System.getenv("pCloudy_ApplicationName"));
 		capabilities.setCapability("pCloudy_DurationInMinutes",System.getenv("pCloudy_DurationInMinutes"));
+		/*capabilities.setCapability("pCloudy_Username", "sridatta.pani@sstsinc.com");
+		capabilities.setCapability("pCloudy_ApiKey", "m3pbymd6k69622p99dkjtj5k");
+		capabilities.setCapability("pCloudy_ApplicationName", "pCloudyAppiumDemo.apk");
+		capabilities.setCapability("pCloudy_DurationInMinutes", 10);*/
 		capabilities.setCapability("pCloudy_DeviceFullName", device);
 		capabilities.setCapability("automationName", "uiautomator2");
 		capabilities.setCapability("platformVersion", "8.0.0");
@@ -113,3 +122,4 @@ public class Runner {
     }
 	
 }
+
