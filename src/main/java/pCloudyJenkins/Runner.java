@@ -26,30 +26,21 @@ public class Runner {
 	AppiumDriver<WebElement> driver;
 	String folder_name;
 	DateFormat df;
-	
+
 	@BeforeTest
 	public void setUpSuite() throws Exception {
-		
+
 	}
-		
-	@Parameters({ "device"})
+
+	@Parameters({"device"})
 	@BeforeMethod
 	public void prepareTest(String device) throws IOException, InterruptedException {
-		
+
 		DesiredCapabilities capabilities = new DesiredCapabilities();
-		System.out.println(device);
-		System.out.println(System.getenv("pCloudy_Username"));
-		System.out.println(System.getenv("pCloudy_ApiKey"));
-		System.out.println(System.getenv("pCloudy_ApplicationName"));
-		System.out.println(System.getenv("pCloudy_DurationInMinutes"));
-	    capabilities.setCapability("pCloudy_Username", System.getenv("pCloudy_Username"));
+		capabilities.setCapability("pCloudy_Username", System.getenv("pCloudy_Username"));
 		capabilities.setCapability("pCloudy_ApiKey",  System.getenv("pCloudy_ApiKey"));
 		capabilities.setCapability("pCloudy_ApplicationName", System.getenv("pCloudy_ApplicationName"));
 		capabilities.setCapability("pCloudy_DurationInMinutes",System.getenv("pCloudy_DurationInMinutes"));
-		/*capabilities.setCapability("pCloudy_Username", "sridatta.pani@sstsinc.com");
-		capabilities.setCapability("pCloudy_ApiKey", "m3pbymd6k69622p99dkjtj5k");
-		capabilities.setCapability("pCloudy_ApplicationName", "pCloudyAppiumDemo.apk");
-		capabilities.setCapability("pCloudy_DurationInMinutes", 10);*/
 		capabilities.setCapability("pCloudy_DeviceFullName", device);
 		capabilities.setCapability("automationName", "uiautomator2");
 		capabilities.setCapability("platformVersion", "8.0.0");
@@ -60,44 +51,44 @@ public class Runner {
 		capabilities.setCapability("appPackage", "com.pcloudy.appiumdemo");
 		capabilities.setCapability("appActivity", "com.ba.mobile.LaunchActivity");
 		driver = new AndroidDriver(new URL("https://device.pcloudy.com/appiumcloud/wd/hub"), capabilities);
-		
+
 	}
 
 	@Test
 	public void Test() throws IOException, InterruptedException {
 
-	    //Click on Accept button
-        driver.findElement(By.xpath("//android.widget.Button[@resource-id='com.pcloudy.appiumdemo:id/accept']")).click();
-        captureScreenShots();
-        
-        //Click on Flight button
-        driver.findElement(By.xpath("//android.widget.Button[@resource-id='com.pcloudy.appiumdemo:id/flightButton']")).click();
-        captureScreenShots();
-        
-        //Select from location
-        driver.findElement(By.xpath("//android.widget.Spinner[@resource-id='com.pcloudy.appiumdemo:id/spinnerfrom']")).click();
-        captureScreenShots();
-	    driver.findElement(By.xpath("//android.widget.CheckedTextView[@resource-id='android:id/text1' and @text='Bangalore, India (BLR)']")).click();
-	    captureScreenShots();
-		
-	    //Select to location
-	    driver.findElement(By.xpath("//android.widget.Spinner[@resource-id='com.pcloudy.appiumdemo:id/spinnerto']")).click();
-	    captureScreenShots();
-        driver.findElement(By.xpath("//android.widget.CheckedTextView[@resource-id='android:id/text1' and @text='Pune, India (PNQ)']")).click();
-        captureScreenShots();
-               
-        //Select one way trip
-        driver.findElement(By.xpath("//android.widget.RadioButton[@resource-id='com.pcloudy.appiumdemo:id/singleTrip']")).click();
-        
-        //Select departure time
-        driver.findElement(By.xpath("//android.widget.TextView[@resource-id='com.pcloudy.appiumdemo:id/txtdepart']")).click();
-        captureScreenShots();
-        driver.findElement(By.xpath("//android.widget.Button[@resource-id='android:id/button1' and @text='OK']")).click();
-        captureScreenShots();
-        
-        //Click on search flights button
-        driver.findElement(By.xpath("//android.widget.Button[@resource-id='com.pcloudy.appiumdemo:id/searchFlights']")).click();
-        captureScreenShots();
+		//Click on Accept button
+		driver.findElement(By.xpath("//android.widget.Button[@resource-id='com.pcloudy.appiumdemo:id/accept']")).click();
+		captureScreenShots();
+
+		//Click on Flight button
+		driver.findElement(By.xpath("//android.widget.Button[@resource-id='com.pcloudy.appiumdemo:id/flightButton']")).click();
+		captureScreenShots();
+
+		//Select from location
+		driver.findElement(By.xpath("//android.widget.Spinner[@resource-id='com.pcloudy.appiumdemo:id/spinnerfrom']")).click();
+		captureScreenShots();
+		driver.findElement(By.xpath("//android.widget.CheckedTextView[@resource-id='android:id/text1' and @text='Bangalore, India (BLR)']")).click();
+		captureScreenShots();
+
+		//Select to location
+		driver.findElement(By.xpath("//android.widget.Spinner[@resource-id='com.pcloudy.appiumdemo:id/spinnerto']")).click();
+		captureScreenShots();
+		driver.findElement(By.xpath("//android.widget.CheckedTextView[@resource-id='android:id/text1' and @text='Pune, India (PNQ)']")).click();
+		captureScreenShots();
+
+		//Select one way trip
+		driver.findElement(By.xpath("//android.widget.RadioButton[@resource-id='com.pcloudy.appiumdemo:id/singleTrip']")).click();
+
+		//Select departure time
+		driver.findElement(By.xpath("//android.widget.TextView[@resource-id='com.pcloudy.appiumdemo:id/txtdepart']")).click();
+		captureScreenShots();
+		driver.findElement(By.xpath("//android.widget.Button[@resource-id='android:id/button1' and @text='OK']")).click();
+		captureScreenShots();
+
+		//Click on search flights button
+		driver.findElement(By.xpath("//android.widget.Button[@resource-id='com.pcloudy.appiumdemo:id/searchFlights']")).click();
+		captureScreenShots();
 	}
 
 
@@ -109,17 +100,17 @@ public class Runner {
 
 	//Capture screenshot
 	public void captureScreenShots() throws IOException {
-        folder_name="screenshot";
-        File f=((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
-        //Date format for screenshot file name
-        df=new  SimpleDateFormat("dd-MMM-yyyy__hh_mm_ssaa");
-        //create dir with given folder name
-        new File(folder_name).mkdir();
-        //Setting file name
-        String file_name=df.format(new Date())+".png";
-        //copy screenshot file into screenshot folder.
-        FileUtils.copyFile(f, new File(folder_name + "/" + file_name));
-    }
-	
+		folder_name="screenshot";
+		File f=((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+		//Date format for screenshot file name
+		df=new  SimpleDateFormat("dd-MMM-yyyy__hh_mm_ssaa");
+		//create dir with given folder name
+		new File(folder_name).mkdir();
+		//Setting file name
+		String file_name=df.format(new Date())+".png";
+		//copy screenshot file into screenshot folder.
+		FileUtils.copyFile(f, new File(folder_name + "/" + file_name));
+	}
+
 }
 
